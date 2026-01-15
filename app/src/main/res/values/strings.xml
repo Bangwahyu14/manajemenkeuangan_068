@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">manajemenkeuangan</string>
+    <string name="title_login">Login</string>
+    <string name="subtitle_login">Sign in to continue</string>
+    <string name="title_register">Create new Account</string>
+    <string name="subtitle_register">Already have an account? Log in here</string>
+    <string name="label_name">Name</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="label_date_of_birth">Date of Birth</string>
+    <string name="action_login">Log In</string>
+    <string name="action_sign_up">Sign Up</string>
+    <string name="forgot_password">Forgot Password?</string>
+
+    <string name="text_income">Pemasukan</string>
+    <string name="text_expense">Pengeluaran</string>
+    <string name="text_balance">Saldo Anda</string>
+    <string name="text_transaction_history">Riwayat Transaksi</string>
+    <string name="text_view_graph">Lihat Grafik</string>
+    <string name="text_hello">Halo,</string>
+
+    <string name="title_add_transaction">Tambah Transaksi</string>
+    <string name="title_edit_transaction">Edit Transaksi</string>
+    <string name="label_amount">Total (Nominal)</string>
+    <string name="label_category">Kategori</string>
+    <string name="label_date">Tanggal</string>
+    <string name="label_note">Catatan</string>
+    <string name="hint_note">Contoh: Makan Siang</string>
+    <string name="btn_save">Simpan</string>
+    <string name="btn_delete">Hapus</string>
+
+    <string name="cat_food">Makanan</string>
+    <string name="cat_transport">Transportasi</string>
+    <string name="cat_salary">Gaji</string>
+    <string name="cat_shopping">Belanja</string>
+
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="manage_users">Kelola User</string>
+    <string name="manage_categories">Kelola Kategori</string>
+
+    <string name="error_empty_field">Kolom tidak boleh kosong</string>
+    <string name="error_login_failed">Login Gagal, periksa email/password</string>
+    <string name="msg_success_save">Data berhasil disimpan</string>
+</resources>
