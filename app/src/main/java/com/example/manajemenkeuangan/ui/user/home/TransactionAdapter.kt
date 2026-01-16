@@ -2,61 +2,57 @@ package com.example.manajemenkeuangan.ui.user.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter // <--- PENTING: Pakai ListAdapter, bukan RecyclerView.Adapter
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.manajemenkeuangan.R
 import com.example.manajemenkeuangan.data.model.Transaction
 import com.example.manajemenkeuangan.databinding.ItemTransactionBinding
 import java.text.NumberFormat
 import java.util.Locale
 
-// Perhatikan: class ini sekarang extend 'ListAdapter', bukan 'RecyclerView.Adapter'
-class TransactionAdapter : ListAdapter<Transaction, TransactionAdapter.ViewHolder>(DiffCallback) {
+// Ganti ListAdapter jadi RecyclerView.Adapter biasa agar lebih mudah dikontrol manual
+class TransactionAdapter : RecyclerView.Adapter<TransactionAdapter.ViewHolder>() {
 
-    // Variable untuk menangani klik item (dikirim ke Activity)
+    // Kita butuh 2 List:
+    // 1. listOriginal: Menyimpan SEMUA data asli (Backup)
+    // 2. listDisplay: Menyimpan data yang SEDANG DITAMPILKAN (Hasil Filter)
+    private var listOriginal = ArrayList<Transaction>()
+    private var listDisplay = ArrayList<Transaction>()
+
+    // Event Klik (Callback)
     var onItemClick: ((Transaction) -> Unit)? = null
 
-    // DiffUtil: Membandingkan data lama vs baru agar update efisien
-    companion object DiffCallback : DiffUtil.ItemCallback<Transaction>() {
-        override fun areItemsTheSame(oldItem: Transaction, newItem: Transaction): Boolean {
-            // Membandingkan apakah ID-nya sama
-            return oldItem.transactionId == newItem.transactionId
-        }
+    // Fungsi untuk memasukkan data awal dari Database
+    fun setData(newList: List<Transaction>) {
+        listOriginal.clear()
+        listOriginal.addAll(newList)
 
-        override fun areContentsTheSame(oldItem: Transaction, newItem: Transaction): Boolean {
-            // Membandingkan apakah seluruh isinya sama
-            return oldItem == newItem
-        }
+        listDisplay.clear()
+        listDisplay.addAll(newList)
+        notifyDataSetChanged()
     }
 
-    inner class ViewHolder(private val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(transaction: Transaction) {
-            // Set Data ke Text View
-            binding.tvCategory.text = transaction.categoryName
-            binding.tvNote.text = if (transaction.note.isNullOrEmpty()) "-" else transaction.note
-            binding.tvDate.text = transaction.transactionDate
+    // --- FITUR FILTER PENCARIAN ---
+    fun filter(query: String) {
+        val text = query.lowercase(Locale.getDefault())
+        listDisplay.clear()
 
-            // Format Rupiah
-            val localeID = Locale("in", "ID")
-            val formatRupiah = NumberFormat.getCurrencyInstance(localeID)
-            val formattedAmount = formatRupiah.format(transaction.amount ?: 0.0).replace("Rp", "Rp ")
+        if (text.isEmpty()) {
+            // Jika pencarian kosong, tampilkan semua lagi
+            listDisplay.addAll(listOriginal)
+        } else {
+            // Cari data yang cocok
+            for (item in listOriginal) {
+                // Kita cari berdasarkan Kategori ATAU Catatan
+                val kategori = item.category_name?.lowercase() ?: ""
+                val catatan = item.note?.lowercase() ?: ""
 
-            binding.tvAmount.text = formattedAmount
-
-            // Logika Warna: Pemasukan (Hijau), Pengeluaran (Merah)
-            if (transaction.type == "pemasukan") {
-                binding.tvAmount.setTextColor(ContextCompat.getColor(itemView.context, R.color.income_green))
-            } else {
-                binding.tvAmount.setTextColor(ContextCompat.getColor(itemView.context, R.color.expense_red))
-            }
-
-            // Aksi Klik pada item
-            itemView.setOnClickListener {
-                onItemClick?.invoke(transaction)
+                if (kategori.contains(text) || catatan.contains(text)) {
+                    listDisplay.add(item)
+                }
             }
         }
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -65,7 +61,38 @@ class TransactionAdapter : ListAdapter<Transaction, TransactionAdapter.ViewHolde
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val transaction = getItem(position) // getItem() adalah method bawaan ListAdapter
+        val transaction = listDisplay[position] // Ambil dari listDisplay
         holder.bind(transaction)
+    }
+
+    override fun getItemCount(): Int = listDisplay.size
+
+    inner class ViewHolder(private val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(transaction: Transaction) {
+            // Tampilkan data ke layar
+            binding.tvCategory.text = transaction.category_name
+            binding.tvNote.text = transaction.note
+            binding.tvDate.text = transaction.transaction_date
+
+            // Format Rupiah
+            val localeID = Locale("in", "ID")
+            val formatRupiah = NumberFormat.getCurrencyInstance(localeID)
+            val nominal = formatRupiah.format(transaction.amount ?: 0.0).replace("Rp", "Rp ")
+            binding.tvAmount.text = nominal
+
+            // Warna (Hijau/Merah)
+            if (transaction.type == "pemasukan") {
+                binding.tvAmount.setTextColor(itemView.context.getColor(android.R.color.holo_green_dark))
+                binding.tvAmount.text = "+ $nominal"
+            } else {
+                binding.tvAmount.setTextColor(itemView.context.getColor(android.R.color.holo_red_dark))
+                binding.tvAmount.text = "- $nominal"
+            }
+
+            // Klik item
+            itemView.setOnClickListener {
+                onItemClick?.invoke(transaction)
+            }
+        }
     }
 }
