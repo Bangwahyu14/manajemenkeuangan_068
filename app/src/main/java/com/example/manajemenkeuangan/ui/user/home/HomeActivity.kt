@@ -75,7 +75,7 @@ class HomeActivity : AppCompatActivity() {
 
         // Observasi Data
         viewModel.transactionList.observe(this) { list ->
-            adapter.submitList(list)
+            adapter.setData(list)
             binding.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         }
 
