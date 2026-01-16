@@ -129,6 +129,18 @@ class HomeActivity : AppCompatActivity() {
         // Filter Action
         binding.btnFilterDate.setOnClickListener { showDatePicker() }
         binding.tvCurrentFilter.setOnClickListener { showDatePicker() }
+
+        binding.svSearch.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Saat user mengetik, panggil fungsi filter di adapter
+                adapter.filter(newText ?: "")
+                return true
+            }
+        })
     }
 
     private fun showDatePicker() {
